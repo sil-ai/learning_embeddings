@@ -166,7 +166,7 @@ def train_embeddings(
     secrets=[modal.Secret.from_name("mw-wandb-secret")],
     mounts=[
         modal.Mount.from_local_dir(
-            "../data/ngram_model", remote_path="/data/ngram_model"
+            "../data/ngram", remote_path="/data/ngram"
         )
     ],
 )
@@ -419,14 +419,14 @@ def main(filename, nn_only=False):
             filename=filename.stem,
         )
         with open(
-            f"../data/ngram_model/vocab/vocabulary_{filename.stem}_001.json", "w"
+            f"../data/ngram/vocab/vocabulary_{filename.stem}_001.json", "w"
         ) as vocab_file:
             json.dump(vocab, vocab_file)
         with open(f"embeddings_dict_{filename.stem}_.json", "w") as f:
             json.dump(embeddings_dict, f)
         torch.save(
             model_weights,
-            f"../data/ngram_model/weights/embedding_weights__{filename.stem}_001.pt",
+            f"../data/ngram/weights/embedding_weights__{filename.stem}_001.pt",
         )
     else:
         df = pd.read_csv(filename)
@@ -434,17 +434,17 @@ def main(filename, nn_only=False):
         train_size = int(0.9 * len(df))  # 90% of the data
 
         with open(
-            f"../data/ngram_model/vocab/vocabulary_{filename.stem}_001.json", "r"
+            f"../data/ngram/vocab/vocabulary_{filename.stem}_001.json", "r"
         ) as vocab_file:
             vocab = json.load(vocab_file)
         model_weights = torch.load(
-            f"../data/ngram_model/weights/embedding_weights__{filename.stem}_001.pt"
+            f"../data/ngram/weights/embedding_weights__{filename.stem}_001.pt"
         )
 
-    em_df = pd.read_parquet("../input/BSB_embeddings.parquet")
+    em_df = pd.read_parquet("../fixtures/BSB_embeddings.parquet")
     df = df.merge(em_df[["vref", "embeddings"]], on="vref", how="inner")
     # Define the size of the train set
-    train_size = int(1.0 * len(df))  # 90% of the data
+    train_size = int(0.9 * len(df))  # 90% of the data
     print(
         f"Training on {train_size} samples, validating on {len(df) - train_size} samples"
     )
